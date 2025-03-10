@@ -49,37 +49,44 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> getChatResponse(ChatMessage m) async {
-    setState(() {
-      _messages.insert(0, m);
-    });
-    List<Map<String, dynamic>> _messagesHistory =
-        _messages.reversed.map((m) {
-          return {
-            "role": m.user.id == _currentUser.id ? "user" : "assistant",
-            "content": m.text,
-          };
-        }).toList();
+  setState(() {
+    _messages.insert(0, m);
+  });
 
-    final request = ChatCompleteText(
-      model: gpt, // ✅ Updated model
-      messages: _messagesHistory,
-      maxToken: 100,
-    );
+  await Future.delayed(Duration(seconds: 2)); // ✅ Prevents spamming API requests
 
+  List<Map<String, dynamic>> _messagesHistory = _messages.reversed.map((m) {
+    return {
+      "role": m.user.id == _currentUser.id ? "user" : "assistant",
+      "content": m.text,
+    };
+  }).toList();
+
+  final request = ChatCompleteText(
+    model: GptTurboChatModel(), // ✅ Use latest supported model
+    messages: _messagesHistory,
+    maxToken: 100,  
+  );
+
+  try {
     final response = await _openAi.onChatCompletion(request: request);
-    for (var element in response!.choices) {
-      if (element.message != null) {
-        setState(() {
-          _messages.insert(
-            0,
-            ChatMessage(
-              user: _chatUser,
-              createdAt: DateTime.now(),
-              text: element.message!.content,
-            ),
-          );
-        });
-      }
+
+    if (response != null && response.choices.isNotEmpty) {
+      String botReply = response.choices.first.message?.content ?? "I didn't understand that.";
+
+      setState(() {
+        _messages.insert(
+          0,
+          ChatMessage(user: _chatUser, createdAt: DateTime.now(), text: botReply),
+        );
+      });
     }
+  } catch (e) {
+    print("❌ OpenAI API Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("API Error: ${e.toString()}")),
+    );
   }
+}
+
 }
