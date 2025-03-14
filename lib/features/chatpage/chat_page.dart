@@ -1,5 +1,5 @@
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
-import 'package:chatgpt/core/constants/const.dart';
+// import 'package:chatgpt/core/constants/const.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +12,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   final _openAi = OpenAI.instance.build(
-    token: OPENAI_API_KEY,
+    // token: OPENAI_API_KEY,
     baseOption: HttpSetup(receiveTimeout: Duration(seconds: 5)),
     enableLog: true,
   );
